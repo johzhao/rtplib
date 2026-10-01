@@ -1,28 +1,25 @@
 #ifndef RTPLIB_RTP_PACKET_PARSER_H
 #define RTPLIB_RTP_PACKET_PARSER_H
 
-#include <cstdint>
 #include <memory>
 
 #include "rtp_stream_manager.h"
-#include "utils/buffer.h"
 
 namespace rtplib {
 
 class RtpPacketParser {
 public:
-    RtpPacketParser();
+    RtpPacketParser() = default;
 
     ~RtpPacketParser() = default;
 
 public:
-    void HandleRtpPacket(const char *data, uint32_t size);
+    std::shared_ptr<RtpPacket> HandleRtpPacket(const uint8_t *data, size_t size);
 
-    void HandleRtcpPacket(const char *data, uint32_t size);
+    void HandleRtcpPacket(const uint8_t *data, size_t size);
 
 private:
     std::shared_ptr<RtpStreamManager> rtp_stream_manager_;
-    utils::Buffer buffer_;
 };
 
 } // namespace rtplib
