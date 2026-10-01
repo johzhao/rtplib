@@ -1,0 +1,76 @@
+---
+Checks: "-*,
+        -abseil-*,
+        -altera-*,
+        -android-*,
+        bugprone-*,
+        -boost-*,
+        cert-*,
+        -cert-err33-c,
+        -cert-int09-c,
+        clang-analyzer-*,
+        concurrency-*,
+        cppcoreguidelines-*,
+        -cppcoreguidelines-avoid-c-arrays,
+        -cppcoreguidelines-avoid-non-const-global-variables,
+        -cppcoreguidelines-no-malloc,
+        -cppcoreguidelines-non-private-member-variables-in-classes,
+        -cppcoreguidelines-owning-memory,
+        -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+        -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
+        -cppcoreguidelines-pro-bounds-constant-array-index,
+        -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+        -cppcoreguidelines-pro-type-const-cast,
+        -cppcoreguidelines-pro-type-reinterpret-cast,
+        -cppcoreguidelines-pro-type-union-access,
+        -cppcoreguidelines-pro-type-vararg,
+        -cppcoreguidelines-special-member-functions,
+        -darwin-*,
+        -fuchsia-*,
+        google-*,
+        -google-readability-todo,
+        hicpp-*,
+        -hicpp-avoid-c-arrays,
+        -hicpp-no-array-decay,
+        -hicpp-no-malloc,
+        -hicpp-signed-bitwise,
+        -hicpp-special-member-functions,
+        -hicpp-vararg,
+        -linuxkernel-*,
+        llvm-*,
+        -llvmlibc-*,
+        misc-*,
+        -misc-include-cleaner,
+        -misc-non-private-member-variables-in-classes,
+        -misc-unused-parameters,
+        -misc-use-anonymous-namespace,
+        modernize-*,
+        -modernize-avoid-c-arrays,
+        -modernize-use-trailing-return-type,
+        mpi-*,
+        -objc-*,
+        openmp-*,
+        performance-*,
+        portability-*,
+        readability-*,
+        -readability-convert-member-functions-to-static,
+        -readability-enum-initial-value,
+        -readability-redundant-access-specifiers,
+        -readability-simplify-boolean-expr,
+        -readability-suspicious-call-argument,
+        zircon-*,
+"
+
+CheckOptions:
+  - key:      cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues
+    value:    '-1;0;1;2;3;4;8;10;16;100;1000'
+  - key:      readability-magic-numbers.IgnoredIntegerValues
+    value:    '-1;0;1;2;3;4;8;10;16;100;1000'
+  - key:      hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
+    value:    true
+  - key:      readability-identifier-length.IgnoredParameterNames
+    value:    'c|id|ip|sn|to|i|x|y|z'
+  - key:      readability-identifier-length.IgnoredVariableNames
+    value:    'c|id|ip|sn|to|i|x|y|z'
+  - key:      readability-function-cognitive-complexity.Threshold
+    value:    25
