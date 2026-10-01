@@ -12,7 +12,7 @@ public:
     ~H265Depacketizer() override;
 
 public:
-    void HandleRtpPayload(const uint8_t *data, uint16_t size) override;
+    void HandleRtpPayload(const std::shared_ptr<RtpPacket> *packets, size_t size) override;
 };
 
 } // namespace rtplib

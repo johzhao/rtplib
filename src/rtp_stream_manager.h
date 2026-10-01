@@ -19,7 +19,7 @@ public:
     ~RtpStreamManager() = default;
 
 public:
-    void HandleRtpPacket(const std::shared_ptr<RtpPacket> &packet);
+    void HandleRtpPacket(std::shared_ptr<RtpPacket> packet);
 
     void RegisterMediaHandler(uint32_t ssrc, MediaType media_type, const std::shared_ptr<IMediaHandler> &handler);
 

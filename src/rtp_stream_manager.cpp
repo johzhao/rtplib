@@ -9,7 +9,7 @@
 
 namespace rtplib {
 
-void RtpStreamManager::HandleRtpPacket(const std::shared_ptr<RtpPacket> &packet) {
+void RtpStreamManager::HandleRtpPacket(std::shared_ptr<RtpPacket> packet) {
     const std::scoped_lock lock(mutex_);
 
     auto jitter_buffer = FindJitterBuffer(packet->ssrc);
@@ -17,7 +17,7 @@ void RtpStreamManager::HandleRtpPacket(const std::shared_ptr<RtpPacket> &packet)
         return;
     }
 
-    jitter_buffer->PushRtpPacket(packet);
+    jitter_buffer->PushRtpPacket(std::move(packet));
 }
 
 void RtpStreamManager::RegisterMediaHandler(uint32_t ssrc, MediaType media_type,
