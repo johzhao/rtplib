@@ -1,6 +1,7 @@
 #ifndef RTPLIB_RTP_PACKET_PARSER_H
 #define RTPLIB_RTP_PACKET_PARSER_H
 
+#include <cstdint>
 #include <memory>
 
 #include "rtp_stream_manager.h"

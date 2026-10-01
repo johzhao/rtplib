@@ -1,6 +1,8 @@
 #ifndef RTPLIB_RTP_PACKET_H
 #define RTPLIB_RTP_PACKET_H
 
+#include <cstdint>
+
 namespace rtplib {
     class RtpPacket {
     public:
