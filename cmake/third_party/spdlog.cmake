@@ -1,0 +1,19 @@
+set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
+set(SPDLOG_SANITIZE_ADDRESS OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
+set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+        spdlog
+        SOURCE_DIR      ${CMAKE_SOURCE_DIR}/third_party/spdlog
+)
+FetchContent_MakeAvailable(spdlog)
+
+include_directories(SYSTEM third_party/spdlog/include)
+
+add_compile_definitions(
+        SPDLOG_COMPILED_LIB
+        SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
+)

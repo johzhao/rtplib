@@ -1,0 +1,11 @@
+message(STATUS "System name: ${CMAKE_SYSTEM_NAME}")
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    message(STATUS "Build for Windows")
+    include(cmake/os/windows.cmake)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS "Build for Linux")
+    include(cmake/os/linux.cmake)
+else ()
+    message(FATAL_ERROR "Not support build on ${CMAKE_SYSTEM_NAME}")
+endif()
