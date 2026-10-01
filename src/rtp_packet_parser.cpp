@@ -107,6 +107,10 @@ std::shared_ptr<RtpPacket> RtpPacketParser::HandleRtpPacket(const uint8_t *data,
         packet->payloadSize -= paddingBytes;
     }
 
+    auto now = std::chrono::steady_clock::now();
+    auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    packet->received_timestamp = timestamp;
+
     return packet;
 }
 
