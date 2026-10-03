@@ -1,5 +1,6 @@
 #ifndef RTPLIB_SEQUENCE_EXTENDER_H
 #define RTPLIB_SEQUENCE_EXTENDER_H
+
 #include <cstdint>
 
 namespace rtplib {

@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
+#include "sequence_extender.h"
 #include "payload_depacketizer/ipayload_depacketizer.h"
 #include "rtp_packet.h"
-#include "sequence_extender.h"
 
 namespace rtplib {
 

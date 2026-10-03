@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <memory>
 
-#include "imedia_handler.h"
-#include "rtp_packet.h"
+#include "rtp/rtp_packet.h"
+#include "rtp/imedia_handler.h"
 
 namespace rtplib {
 

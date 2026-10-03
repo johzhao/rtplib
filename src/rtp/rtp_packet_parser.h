@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "rtp_packet.h"
 #include "rtp_stream_manager.h"
 
 namespace rtplib {
