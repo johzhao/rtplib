@@ -22,6 +22,9 @@ Reactor::Reactor()
 
 Reactor::~Reactor() {
     Release();
+
+    connections_.clear();
+    delete[] events_;
 }
 
 int Reactor::Initialize() {
@@ -55,8 +58,37 @@ int Reactor::Initialize() {
     return 0;
 }
 
+int Reactor::RegisterForListen(int fd, const std::shared_ptr<IReactorHandler> &handler) {
+    auto connection = std::make_shared<Connection>();
+    connection->is_listen = true;
+    connection->fd = fd;
+    connection->token = GetToken();
+    connection->handler = handler;
+
+    epoll_event event{};
+    event.events = EPOLLIN | EPOLLRDHUP | EPOLLET;
+    event.data.fd = connection->fd;
+    event.data.u64 = connection->token;
+
+    auto rc = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, connection->fd, &event);
+    if (rc < 0) {
+        SPDLOG_ERROR("epoll_ctl add receive sock failed with error: {}, reason: '{}'", errno,
+                     strerror(errno)); // NOLINT(*-mt-unsafe)
+
+        return -1;
+    }
+
+    {
+        const std::scoped_lock lock(mutex_);
+        connections_[connection->token] = connection;
+    }
+
+    return 0;
+}
+
 int Reactor::RegisterForDataRead(int fd, const std::shared_ptr<IReactorHandler> &handler) {
     auto connection = std::make_shared<Connection>();
+    connection->is_listen = false;
     connection->fd = fd;
     connection->token = GetToken();
     connection->handler = handler;
@@ -218,6 +250,12 @@ void Reactor::HandleRead(const uint64_t &token) {
         return;
     }
 
+    if (connection->is_listen) {
+        connection->handler->HandleReceivedData(connection->fd, nullptr, 0, nullptr, 0);
+
+        return;
+    }
+
     constexpr int kReceiveBufferSize = 8192;
     char buffer[kReceiveBufferSize];
 
@@ -228,8 +266,8 @@ void Reactor::HandleRead(const uint64_t &token) {
         auto received = recvfrom(connection->fd, buffer, sizeof(buffer), 0, reinterpret_cast<sockaddr *>(&address),
                                  &address_len);
         if (received > 0) {
-            connection->handler->HandleReceivedData(buffer, received, reinterpret_cast<sockaddr *>(&address),
-                                                    address_len);
+            connection->handler->HandleReceivedData(connection->fd, buffer, received,
+                                                    reinterpret_cast<sockaddr *>(&address), address_len);
 
             continue;
         }
@@ -265,7 +303,7 @@ void Reactor::HandleWrite(const uint64_t &token) {
         return;
     }
 
-    connection->handler->HandleWritable();
+    connection->handler->HandleWritable(connection->fd);
 }
 
 void Reactor::HandleClose(const uint64_t &token) {
@@ -289,7 +327,7 @@ void Reactor::HandleClose(const uint64_t &token) {
         connections_.erase(token);
     }
 
-    connection->handler->HandleDisconnected();
+    connection->handler->HandleDisconnected(connection->fd);
 }
 
 void Reactor::ProcessPendingClose() {

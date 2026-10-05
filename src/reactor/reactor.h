@@ -22,6 +22,8 @@ public:
 public:
     int Initialize();
 
+    int RegisterForListen(int fd, const std::shared_ptr<IReactorHandler> &handler) override;
+
     int RegisterForDataRead(int fd, const std::shared_ptr<IReactorHandler> &handler) override;
 
     int UnRegisterForDataRead(int fd) override;
@@ -33,6 +35,7 @@ public:
 private:
     class Connection {
     public:
+        bool is_listen = false;
         int fd = 0;
         uint64_t token = 0;
         std::shared_ptr<IReactorHandler> handler = nullptr;
