@@ -15,7 +15,7 @@ namespace {
 
 class EchoTcpServer : public rtp::IReactorHandler, public std::enable_shared_from_this<rtp::IReactorHandler> {
 public:
-    explicit EchoTcpServer(const std::shared_ptr<rtp::IReactor> &reactor)
+    explicit EchoTcpServer(const std::weak_ptr<rtp::IReactor> &reactor)
         : reactor_(reactor) {}
 
     ~EchoTcpServer() override {
@@ -64,33 +64,37 @@ public:
             return -1;
         }
 
-        reactor_->RegisterForListen(listen_fd_, shared_from_this());
+        auto strong_reactor = reactor_.lock();
+        if (strong_reactor != nullptr) {
+            strong_reactor->RegisterForListen(listen_fd_, shared_from_this());
+        }
 
         return 0;
     }
 
-    void HandleReceivedData(int fd, const char *data, size_t len, sockaddr *address, size_t address_length) override {
-        if (fd == listen_fd_) {
-            sockaddr_in client_addr{};
-            socklen_t client_len = sizeof(client_addr);
+    void HandleIncomingConnection(int fd) override {
+        sockaddr_in client_addr{};
+        socklen_t client_len = sizeof(client_addr);
 
-            int client_fd = accept(listen_fd_, reinterpret_cast<sockaddr *>(&client_addr), &client_len);
-            if (client_fd == -1) {
-                SPDLOG_ERROR("accept failed");
-
-                return;
-            }
-
-            char client_ip[INET_ADDRSTRLEN]{};
-            inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
-
-            // std::cout << "Client connected: " << client_ip << ":" << ntohs(client_addr.sin_port) << '\n';
-
-            reactor_->RegisterForDataRead(client_fd, shared_from_this());
+        int client_fd = accept(listen_fd_, reinterpret_cast<sockaddr *>(&client_addr), &client_len);
+        if (client_fd == -1) {
+            SPDLOG_ERROR("accept failed");
 
             return;
         }
 
+        char client_ip[INET_ADDRSTRLEN]{};
+        inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
+
+        // std::cout << "Client connected: " << client_ip << ":" << ntohs(client_addr.sin_port) << '\n';
+
+        auto strong_reactor = reactor_.lock();
+        if (strong_reactor != nullptr) {
+            strong_reactor->RegisterForDataRead(client_fd, shared_from_this());
+        }
+    }
+
+    void HandleReceivedData(int fd, const char *data, size_t len, sockaddr *address, size_t address_length) override {
         send(fd, data, len, 0);
     }
 
@@ -113,7 +117,7 @@ private:
     }
 
 private:
-    std::shared_ptr<rtp::IReactor> reactor_;
+    std::weak_ptr<rtp::IReactor> reactor_;
     int listen_fd_ = -1;
 };
 

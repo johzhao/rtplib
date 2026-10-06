@@ -114,7 +114,7 @@ int Reactor::RegisterForDataRead(int fd, const std::shared_ptr<IReactorHandler> 
     return 0;
 }
 
-int Reactor::UnRegisterForDataRead(int fd) {
+int Reactor::UnRegister(int fd) {
     epoll_event event{};
     event.events = EPOLLIN;
     event.data.fd = fd;
@@ -251,7 +251,7 @@ void Reactor::HandleRead(const uint64_t &token) {
     }
 
     if (connection->is_listen) {
-        connection->handler->HandleReceivedData(connection->fd, nullptr, 0, nullptr, 0);
+        connection->handler->HandleIncomingConnection(connection->fd);
 
         return;
     }

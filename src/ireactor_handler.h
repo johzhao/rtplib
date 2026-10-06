@@ -9,13 +9,15 @@ class IReactorHandler {
 public:
     virtual ~IReactorHandler() = default;
 
-    virtual void HandleReceivedData(const char *data, size_t len, sockaddr *address, size_t address_length) = 0;
+    virtual void HandleIncomingConnection(int fd) = 0;
 
-    virtual void HandleWritable() = 0;
+    virtual void HandleReceivedData(int fd, const char *data, size_t len, sockaddr *address, size_t address_length) = 0;
 
-    virtual void HandleNetworkError(int code) = 0;
+    virtual void HandleWritable(int fd) = 0;
 
-    virtual void HandleDisconnected() = 0;
+    virtual void HandleNetworkError(int fd, int code) = 0;
+
+    virtual void HandleDisconnected(int fd) = 0;
 };
 
 } // namespace rtp

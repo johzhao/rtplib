@@ -26,7 +26,7 @@ public:
 
     int RegisterForDataRead(int fd, const std::shared_ptr<IReactorHandler> &handler) override;
 
-    int UnRegisterForDataRead(int fd) override;
+    int UnRegister(int fd) override;
 
     int Start() override;
 
