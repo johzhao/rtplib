@@ -7,40 +7,31 @@
 #include <mutex>
 #include <thread>
 #include <unordered_map>
-#include <vector>
 
-#include "ireactor.h"
+#include "channel.h"
 
-namespace rtp {
+namespace network {
 
-class Reactor : public IReactor {
+class Reactor {
 public:
-    Reactor();
+    explicit Reactor(int id);
 
-    ~Reactor() override;
+    ~Reactor();
 
 public:
     int Initialize();
 
-    int RegisterForListen(int fd, const std::shared_ptr<IReactorHandler> &handler) override;
+    int Add(const std::shared_ptr<Channel> &channel, uint32_t events);
 
-    int RegisterForDataRead(int fd, const std::shared_ptr<IReactorHandler> &handler) override;
+    int Modify(const std::shared_ptr<Channel> &channel, uint32_t events);
 
-    int UnRegister(int fd) override;
+    int Remove(const std::shared_ptr<Channel> &channel);
 
-    int Start() override;
+    int Start();
 
-    int Stop() override;
+    int Stop();
 
 private:
-    class Connection {
-    public:
-        bool is_listen = false;
-        int fd = 0;
-        uint64_t token = 0;
-        std::shared_ptr<IReactorHandler> handler = nullptr;
-    };
-
     void RunLoop();
 
     uint64_t GetToken();
@@ -49,33 +40,24 @@ private:
 
     void HandleWakeup() const;
 
-    void HandleRead(const uint64_t &token);
-
-    void HandleWrite(const uint64_t &token);
-
-    void HandleClose(const uint64_t &token);
-
-    void ProcessPendingClose();
-
-    std::shared_ptr<Connection> FindConnection(const uint64_t &token);
+    std::shared_ptr<Channel> FindChannel(const uint64_t &token);
 
     void Release();
 
 private:
+    int id_;
     int epoll_fd_ = 0;
     int wakeup_fd_ = 0;
     epoll_event *events_ = nullptr;
 
     std::mutex mutex_;
     uint64_t next_token_;
-    std::unordered_map<uint64_t, std::shared_ptr<Connection>> connections_;
+    std::unordered_map<uint64_t, std::shared_ptr<Channel>> channel_map_;
 
     std::atomic<bool> running_ = false;
     std::thread work_thread_;
-
-    std::vector<uint64_t> pending_close_;
 };
 
-} // namespace rtp
+} // namespace network
 
 #endif // RTPLIB_POLL_THREAD_H

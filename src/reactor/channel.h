@@ -1,0 +1,40 @@
+#ifndef RTPLIB_CHANNEL_H
+#define RTPLIB_CHANNEL_H
+
+#include <cstdint>
+#include <functional>
+#include <memory>
+
+namespace network {
+
+class Channel : public std::enable_shared_from_this<Channel> {
+public:
+    using Callback = std::function<void(const std::shared_ptr<Channel> &)>;
+
+    explicit Channel(int fd);
+
+    ~Channel();
+
+public:
+    void SetReadCallback(Callback callback);
+
+    void SetWriteCallback(Callback callback);
+
+    int Fd() const;
+
+    void HandleEvents(uint32_t events);
+
+    uint64_t Token() const;
+
+    void SetToken(const uint64_t &token);
+
+private:
+    int fd_;
+    uint64_t token_ = 0;
+    Callback read_callback_ = nullptr;
+    Callback write_callback_ = nullptr;
+};
+
+} // namespace network
+
+#endif // RTPLIB_CHANNEL_H
