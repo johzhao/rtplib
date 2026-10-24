@@ -34,6 +34,8 @@ public:
 private:
     void RunLoop();
 
+    void DoDispatch(const uint32_t &events, const uint64_t &token);
+
     uint64_t GetToken();
 
     void Wakeup() const;

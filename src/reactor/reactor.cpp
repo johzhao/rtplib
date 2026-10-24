@@ -178,18 +178,32 @@ void Reactor::RunLoop() {
                 continue;
             }
 
-            std::shared_ptr<Channel> channel = nullptr;
-            {
-                const std::scoped_lock lock(mutex_);
-                channel = FindChannel(token);
-            }
-
-            if (channel == nullptr) {
-                continue;
-            }
-
-            channel->HandleEvents(events[i].events);
+            DoDispatch(events[i].events, token);
         }
+    }
+}
+
+void Reactor::DoDispatch(const uint32_t &events, const uint64_t &token) {
+    std::shared_ptr<Channel> channel = nullptr;
+    {
+        const std::scoped_lock lock(mutex_);
+        channel = FindChannel(token);
+    }
+
+    if (channel == nullptr) {
+        return;
+    }
+
+    if ((events & EPOLLIN) != 0) {
+        channel->HandleReadEvent();
+    }
+
+    if ((events & EPOLLOUT) != 0) {
+        channel->HandleWriteEvent();
+    }
+
+    if ((events & (EPOLLERR | EPOLLHUP)) != 0) {
+        channel->HandleErrorEvent();
     }
 }
 

@@ -20,9 +20,15 @@ public:
 
     void SetWriteCallback(Callback callback);
 
+    void SetErrorCallback(Callback callback);
+
     int Fd() const;
 
-    void HandleEvents(uint32_t events);
+    void HandleReadEvent();
+
+    void HandleWriteEvent();
+
+    void HandleErrorEvent();
 
     uint64_t Token() const;
 
@@ -33,6 +39,7 @@ private:
     uint64_t token_ = 0;
     Callback read_callback_ = nullptr;
     Callback write_callback_ = nullptr;
+    Callback error_callback_ = nullptr;
 };
 
 } // namespace network
