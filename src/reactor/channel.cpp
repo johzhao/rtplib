@@ -24,19 +24,19 @@ int Channel::Fd() const {
 
 void Channel::HandleReadEvent() {
     if (read_callback_ != nullptr) {
-        read_callback_(shared_from_this());
+        read_callback_(this);
     }
 }
 
 void Channel::HandleWriteEvent() {
     if (write_callback_ != nullptr) {
-        write_callback_(shared_from_this());
+        write_callback_(this);
     }
 }
 
 void Channel::HandleErrorEvent() {
     if (error_callback_ != nullptr) {
-        error_callback_(shared_from_this());
+        error_callback_(this);
     }
 }
 

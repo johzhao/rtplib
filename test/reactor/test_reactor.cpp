@@ -35,18 +35,18 @@ public:
 
         int opt = 1;
         if (setsockopt(listen_fd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-            SPDLOG_ERROR("setsockopt SO_REUSEADDR failed");
+            SPDLOG_ERROR("set socket reuse address failed");
             Release();
 
             return -1;
         }
 
-        sockaddr_in server_addr{};
-        server_addr.sin_family = AF_INET;
-        inet_pton(AF_INET, host.c_str(), &server_addr.sin_addr);
-        server_addr.sin_port = htons(port);
+        sockaddr_in address{};
+        address.sin_family = AF_INET;
+        inet_pton(AF_INET, host.c_str(), &address.sin_addr);
+        address.sin_port = htons(port);
 
-        if (bind(listen_fd_, reinterpret_cast<sockaddr *>(&server_addr), sizeof(server_addr)) == -1) {
+        if (bind(listen_fd_, reinterpret_cast<sockaddr *>(&address), sizeof(address)) == -1) {
             SPDLOG_ERROR("bind failed");
             Release();
 
@@ -62,7 +62,8 @@ public:
         }
 
         auto listen_channel = std::make_shared<network::Channel>(listen_fd_);
-        listen_channel->SetReadCallback([this](const std::shared_ptr<network::Channel> &channel) {
+        // ReSharper disable once CppParameterNeverUsed
+        listen_channel->SetReadCallback([this](network::Channel *channel) {
             OnAccept();
         });
 
@@ -76,14 +77,14 @@ public:
 
 private:
     void OnAccept() {
-        sockaddr_in client_addr{};
-        socklen_t client_len = sizeof(client_addr);
+        sockaddr_in address{};
+        socklen_t client_len = sizeof(address);
         int client_fd = -1;
         while (true) {
-            client_fd = accept4(listen_fd_, reinterpret_cast<sockaddr *>(&client_addr), &client_len,
+            client_fd = accept4(listen_fd_, reinterpret_cast<sockaddr *>(&address), &client_len,
                                 SOCK_NONBLOCK | SOCK_CLOEXEC);
             if (client_fd >= 0) {
-                HandleNewConnection(client_addr, client_fd);
+                HandleNewConnection(address, client_fd);
 
                 continue;
             }
@@ -107,7 +108,7 @@ private:
         SPDLOG_INFO("received connection from {}:{} as channel {}", client_ip, ntohs(address.sin_port), client_fd);
 
         auto client_channel = std::make_shared<network::Channel>(client_fd);
-        client_channel->SetReadCallback([this](const std::shared_ptr<network::Channel> &channel) {
+        client_channel->SetReadCallback([this](network::Channel *channel) {
             OnRead(channel);
         });
 
@@ -117,7 +118,7 @@ private:
         }
     }
 
-    void OnRead(const std::shared_ptr<network::Channel> &channel) {
+    void OnRead(network::Channel *channel) {
         while (true) {
             auto ret = recv(channel->Fd(), buffer_.data(), buffer_.size(), 0);
             if (ret > 0) {
@@ -142,17 +143,18 @@ private:
         }
     }
 
-    void HandleReceivedData(const std::shared_ptr<network::Channel> &channel, const char *buffer, size_t len) {
-        // SPDLOG_INFO("received {} bytes from channel {}", ret, channel->Fd());
+    // ReSharper disable once CppParameterMayBeConstPtrOrRef
+    void HandleReceivedData(network::Channel *channel, const char *buffer, size_t len) {
+        SPDLOG_DEBUG("received {} bytes from channel {}", len, channel->Fd());
         send(channel->Fd(), buffer, len, MSG_NOSIGNAL);
     }
 
-    void HandleDisconnected(const std::shared_ptr<network::Channel> &channel) {
+    void HandleDisconnected(network::Channel *channel) {
         SPDLOG_INFO("channel {} closed", channel->Fd());
 
         auto strong_reactor = reactor_.lock();
         if (strong_reactor != nullptr) {
-            strong_reactor->Remove(channel);
+            strong_reactor->Remove(channel->shared_from_this());
         }
     }
 

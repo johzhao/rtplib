@@ -8,7 +8,6 @@
 namespace network {
 
 constexpr int kReceiveBufferSize = 64 * 1024;
-constexpr int kSendBufferSize = 64 * 1024;
 
 TcpConnection::TcpConnection(std::shared_ptr<Reactor> reactor, std::shared_ptr<Channel> channel, std::string ip,
                              uint16_t port)
@@ -24,11 +23,11 @@ TcpConnection::~TcpConnection() {
 }
 
 int TcpConnection::Initialize() {
-    channel_->SetReadCallback([this](const std::shared_ptr<Channel> &channel) {
+    channel_->SetReadCallback([this](Channel *channel) {
         OnReceived(channel);
     });
 
-    channel_->SetWriteCallback([this](const std::shared_ptr<Channel> &channel) {
+    channel_->SetWriteCallback([this](Channel *channel) {
         OnWritable(channel);
     });
 
@@ -72,7 +71,7 @@ void TcpConnection::Send(const char *data, size_t length) {
     send_buffer_.resize(send_buffer_.size() + length);
     memcpy(send_buffer_.data() + send_buffer_offset_, data, length);
 
-    SendImpl();
+    SendImpl(channel_.get());
 }
 
 void TcpConnection::Shutdown() {
@@ -90,7 +89,8 @@ void TcpConnection::Shutdown() {
     }
 }
 
-void TcpConnection::OnReceived(const std::shared_ptr<Channel> &channel) {
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+void TcpConnection::OnReceived(Channel *channel) {
     while (true) {
         auto ret = recv(channel->Fd(), receive_buffer_.data(), receive_buffer_.size(), 0);
         if (ret > 0) {
@@ -132,15 +132,16 @@ void TcpConnection::HandleDisconnected() {
     }
 }
 
-void TcpConnection::OnWritable(const std::shared_ptr<Channel> &channel) {
+void TcpConnection::OnWritable(Channel *channel) {
     if (closed_) {
         return;
     }
 
-    SendImpl();
+    SendImpl(channel);
 }
 
-void TcpConnection::SendImpl() {
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
+void TcpConnection::SendImpl(Channel *channel) {
     if (closed_) {
         send_buffer_.clear();
         send_buffer_offset_ = 0;
@@ -148,20 +149,21 @@ void TcpConnection::SendImpl() {
         return;
     }
 
-    auto ret = send(channel_->Fd(), send_buffer_.data() + send_buffer_offset_, send_buffer_.size() - send_buffer_offset_, MSG_NOSIGNAL);
+    auto ret = send(channel->Fd(), send_buffer_.data() + send_buffer_offset_, send_buffer_.size() - send_buffer_offset_,
+                    MSG_NOSIGNAL);
     if (ret > 0) {
         send_buffer_offset_ += ret;
         if (send_buffer_offset_ == send_buffer_.size()) {
             send_buffer_.clear();
             send_buffer_offset_ = 0;
 
-            reactor_->Modify(channel_, EPOLLIN | EPOLLRDHUP | EPOLLET);
+            reactor_->Modify(channel->shared_from_this(), EPOLLIN | EPOLLRDHUP | EPOLLET);
 
             if (write_callback_ != nullptr) {
                 write_callback_(this);
             }
         } else {
-            reactor_->Modify(channel_, EPOLLIN | EPOLLRDHUP | EPOLLET | EPOLLOUT);
+            reactor_->Modify(channel->shared_from_this(), EPOLLIN | EPOLLRDHUP | EPOLLET | EPOLLOUT);
         }
     }
 }

@@ -32,7 +32,7 @@ int TcpServer::Start(uint16_t port, const std::string &host) {
 
     int opt = 1;
     if (setsockopt(listen_fd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
-        SPDLOG_ERROR("setsockopt SO_REUSEADDR failed");
+        SPDLOG_ERROR("set socket reuse address failed");
         Release();
 
         return -1;
@@ -59,7 +59,8 @@ int TcpServer::Start(uint16_t port, const std::string &host) {
     }
 
     auto listen_channel = std::make_shared<Channel>(listen_fd_);
-    listen_channel->SetReadCallback([this](const std::shared_ptr<Channel> &channel) {
+    // ReSharper disable once CppParameterNeverUsed
+    listen_channel->SetReadCallback([this](Channel *channel) {
         OnAccept();
     });
 

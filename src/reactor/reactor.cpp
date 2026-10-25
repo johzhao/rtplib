@@ -183,7 +183,7 @@ void Reactor::RunLoop() {
     }
 }
 
-void Reactor::DoDispatch(const uint32_t &events, const uint64_t &token) {
+void Reactor::DoDispatch(const uint32_t &events, const uint64_t &token) { // NOLINT(*-easily-swappable-parameters)
     std::shared_ptr<Channel> channel = nullptr;
     {
         const std::scoped_lock lock(mutex_);

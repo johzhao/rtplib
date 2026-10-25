@@ -30,7 +30,6 @@ public:
             return ret;
         }
 
-
         tcp_server_ = std::make_shared<network::TcpServer>(reactor_);
         tcp_server_->SetConnectionCallback([this](const std::shared_ptr<network::TcpConnection> &conn) {
             HandleConnection(conn);

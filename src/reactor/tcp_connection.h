@@ -1,7 +1,6 @@
 #ifndef RTPLIB_TCP_CONNECTION_H
 #define RTPLIB_TCP_CONNECTION_H
 
-#include <cstdint>
 #include <memory>
 
 #include "channel.h"
@@ -39,15 +38,15 @@ public:
     void Shutdown();
 
 private:
-    void OnReceived(const std::shared_ptr<Channel> &channel);
+    void OnReceived(Channel *channel);
 
     void HandleReceivedData(const char *buffer, size_t len);
 
     void HandleDisconnected();
 
-    void OnWritable(const std::shared_ptr<Channel> &channel);
+    void OnWritable(Channel *channel);
 
-    void SendImpl();
+    void SendImpl(Channel *channel);
 
     void Release();
 

@@ -9,7 +9,7 @@ namespace network {
 
 class Channel : public std::enable_shared_from_this<Channel> {
 public:
-    using Callback = std::function<void(const std::shared_ptr<Channel> &)>;
+    using Callback = std::function<void(Channel *channel)>;
 
     explicit Channel(int fd);
 
