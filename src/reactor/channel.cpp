@@ -1,16 +1,21 @@
 #include "channel.h"
 
+#include <unistd.h>
+
 #include <spdlog/spdlog.h>
 
 namespace network {
 
 Channel::Channel(int fd)
     : fd_(fd) {
-    SPDLOG_TRACE("channel {} created", fd_);
+    SPDLOG_TRACE("channel {} was created", fd_);
 }
 
 Channel::~Channel() {
-    SPDLOG_TRACE("channel {} destroyed", fd_);
+    if (fd_ >= 0) {
+        close(fd_);
+    }
+    SPDLOG_TRACE("channel {} was destroyed", fd_);
 }
 
 int Channel::Fd() const {

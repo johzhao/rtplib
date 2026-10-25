@@ -109,7 +109,7 @@ int Reactor::Modify(const std::shared_ptr<Channel> &channel, uint32_t events) {
 }
 
 int Reactor::Remove(const std::shared_ptr<Channel> &channel) {
-    if (channel->Token() == 0) {
+    if (channel == nullptr || channel->Token() == 0) {
         SPDLOG_ERROR("reactor {} remove channel which token was invalid", id_);
 
         return -1;
