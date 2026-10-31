@@ -104,8 +104,8 @@ void TcpServer::HandleNewConnection(const sockaddr_in &address, int client_fd) {
     auto client_channel = std::make_shared<Channel>(client_fd);
 
     if (connection_callback_ != nullptr) {
-        auto connection = std::make_shared<TcpConnection>(reactor_, client_channel, client_ip, client_port);
-        auto ret = connection->Initialize();
+        auto connection = std::make_shared<TcpConnection>(reactor_);
+        auto ret = connection->Initialize(client_channel, client_ip, client_port);
         if (ret != 0) {
             SPDLOG_ERROR("initialize connection failed");
 

@@ -9,12 +9,8 @@ namespace network {
 
 constexpr int kReceiveBufferSize = 64 * 1024;
 
-TcpConnection::TcpConnection(std::shared_ptr<Reactor> reactor, std::shared_ptr<Channel> channel, std::string ip,
-                             uint16_t port)
+TcpConnection::TcpConnection(std::shared_ptr<Reactor> reactor)
     : reactor_(std::move(reactor))
-    , channel_(std::move(channel))
-    , ip_(std::move(ip))
-    , port_(port)
     , receive_buffer_(kReceiveBufferSize) {
 }
 
@@ -22,23 +18,26 @@ TcpConnection::~TcpConnection() {
     Release();
 }
 
-int TcpConnection::Initialize() {
-    channel_->SetReadCallback([this](Channel *channel) {
-        OnReceived(channel);
+int TcpConnection::Initialize(std::shared_ptr<Channel> channel, const std::string &ip, uint16_t port) {
+    channel->SetReadCallback([this](Channel *chan) {
+        OnReceived(chan);
     });
 
-    channel_->SetWriteCallback([this](Channel *channel) {
-        OnWritable(channel);
+    channel->SetWriteCallback([this](Channel *chan) {
+        OnWritable(chan);
     });
 
-    auto ret = reactor_->Add(channel_, EPOLLIN | EPOLLRDHUP | EPOLLET);
+    auto ret = reactor_->Add(channel, EPOLLIN | EPOLLRDHUP | EPOLLET);
     if (ret != 0) {
         SPDLOG_ERROR("reactor add failed {}", ret);
 
         return ret;
     }
 
+    channel_ = std::move(channel);
     id_ = channel_->Token();
+    ip_ = ip;
+    port_ = port;
 
     return 0;
 }

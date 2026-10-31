@@ -15,3 +15,12 @@ target_link_libraries(test_tcp_server PUBLIC
         asan
 )
 add_test(test_tcp_server NAME test_tcp_server COMMAND test_tcp_server)
+
+add_executable(test_tcp_client
+        test_tcp_client.cpp
+)
+target_link_libraries(test_tcp_client PUBLIC
+        reactor
+        asan
+)
+add_test(NAME test_tcp_client COMMAND test_tcp_client)

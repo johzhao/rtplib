@@ -10,7 +10,7 @@ namespace network {
 
 class TcpConnection {
 public:
-    TcpConnection(std::shared_ptr<Reactor> reactor, std::shared_ptr<Channel> channel, std::string ip, uint16_t port);
+    explicit TcpConnection(std::shared_ptr<Reactor> reactor);
 
     ~TcpConnection();
 
@@ -21,7 +21,7 @@ public:
     using CloseCallback = std::function<void(TcpConnection *connection)>;
 
 public:
-    int Initialize();
+    int Initialize(std::shared_ptr<Channel> channel, const std::string &ip, uint16_t port);
 
     uint64_t Id() const;
 
@@ -55,7 +55,7 @@ private:
     std::shared_ptr<Reactor> reactor_;
     std::shared_ptr<Channel> channel_;
     std::string ip_;
-    uint16_t port_;
+    uint16_t port_ = 0;
 
     std::vector<char> receive_buffer_;
     ReadCallback read_callback_;

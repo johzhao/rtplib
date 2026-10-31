@@ -67,10 +67,16 @@ int Reactor::Add(const std::shared_ptr<Channel> &channel, uint32_t events) {
 
     auto rc = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, channel->Fd(), &event);
     if (rc < 0) {
-        SPDLOG_ERROR("reactor {} epoll_ctl add receive sock failed with error: {}, reason: '{}'", id_, errno,
-                     strerror(errno)); // NOLINT(*-mt-unsafe)
+        if (errno == EEXIST) {
+            rc = epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, channel->Fd(), &event);
+        }
 
-        return -1;
+        if (rc < 0) {
+            SPDLOG_ERROR("reactor {} epoll_ctl add receive sock failed with error: {}, reason: '{}'", id_, errno,
+                         strerror(errno)); // NOLINT(*-mt-unsafe)
+
+            return -1;
+        }
     }
 
     {
