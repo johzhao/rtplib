@@ -31,8 +31,7 @@ TimerManager::TimerId TimerManager::AddTimer(uint64_t milliseconds, TimerCallbac
         timer_queue_.push(timer);
     }
 
-    new_timer_added.store(true);
-    timer_condition_variable.notify_one();
+    timer_condition_variable.notify_all();
 
     return timer->id;
 }
@@ -88,11 +87,8 @@ void TimerManager::RunLoop() {
 
         auto timer = timer_queue_.top();
         if (timer->expire_time > std::chrono::steady_clock::now()) {
-            timer_condition_variable.wait_until(unique_lock, timer->expire_time, [this] {
-                return !running_ || new_timer_added.load();
-            });
+            timer_condition_variable.wait_until(unique_lock, timer->expire_time);
 
-            new_timer_added.store(false);
             continue;
         }
 

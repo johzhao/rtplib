@@ -51,7 +51,6 @@ private:
 private:
     std::thread work_thread_;
     std::atomic<bool> running_{false};
-    std::atomic<bool> new_timer_added{false};
     std::mutex timer_mutex_;
     std::condition_variable timer_condition_variable;
     std::unordered_map<TimerId, std::shared_ptr<Timer>> timer_map_;
