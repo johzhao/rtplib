@@ -7,7 +7,7 @@
 
 namespace network {
 
-constexpr int kReceiveBufferSize = 64 * 1024;
+static constexpr int kReceiveBufferSize = 64 * 1024;
 
 TcpConnection::TcpConnection(std::shared_ptr<Reactor> reactor)
     : reactor_(std::move(reactor))

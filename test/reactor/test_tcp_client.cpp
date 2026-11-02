@@ -7,13 +7,13 @@
 
 static bool gRunning = true;
 
-static void HandleSingle(int signal) {
+static void HandleSignal(int signal) {
     gRunning = false;
 }
 
 int main() {
-    signal(SIGINT, HandleSingle);
-    signal(SIGTERM, HandleSingle);
+    signal(SIGINT, HandleSignal);
+    signal(SIGTERM, HandleSignal);
 
     SetupLogger(spdlog::level::debug);
 

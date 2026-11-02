@@ -4,6 +4,7 @@ add_library(reactor STATIC
         tcp_server.cpp
         tcp_connection.cpp
         tcp_client.cpp
+        udp_connection.cpp
 )
 target_link_libraries(reactor PUBLIC
         Threads::Threads

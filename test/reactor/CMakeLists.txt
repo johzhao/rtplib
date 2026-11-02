@@ -24,3 +24,12 @@ target_link_libraries(test_tcp_client PUBLIC
         asan
 )
 add_test(NAME test_tcp_client COMMAND test_tcp_client)
+
+add_executable(test_udp_connection
+        test_udp_connection.cpp
+)
+target_link_libraries(test_udp_connection PUBLIC
+        reactor
+        asan
+)
+add_test(NAME test_udp_connection COMMAND test_udp_connection)
